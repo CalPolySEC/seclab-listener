@@ -16,12 +16,13 @@ import (
 const (
 	ReqOpen     = 0xff
 	ReqClose    = 0x00
+	ReqKeygen   = 0xaa
 	RespAllGood = 0xff
 )
 
 type Server interface {
 	CheckMessage([]byte) error
-	DispatchRequest(byte) (byte, error)
+	DispatchRequest(byte) ([]byte, error)
 	Serve(string)
 }
 
@@ -58,15 +59,15 @@ func (s *server) CheckMessage(data []byte) error {
 	return nil
 }
 
-func (s *server) DispatchRequest(status byte) (byte, error) {
+func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	if status == ReqOpen {
 		log.Print("Received request: open")
-		return RespAllGood, s.backend.Open()
+		return []byte{RespAllGood}, s.backend.Open()
 	} else if status == ReqClose {
 		log.Print("Received request: close")
-		return RespAllGood, s.backend.Close()
+		return []byte{RespAllGood}, s.backend.Close()
 	} else {
-		return 0, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
+		return nil, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
 	}
 }
 
@@ -88,7 +89,7 @@ func (s *server) handleConnection(conn net.Conn) {
 			log.Print(err)
 			return
 		}
-		conn.Write([]byte{resp})
+		conn.Write(resp)
 	}
 }
 

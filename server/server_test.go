@@ -90,7 +90,7 @@ func TestDispatchOpenGood(t *testing.T) {
 	resp, err := getTestInstance().DispatchRequest(0xff)
 	if err != nil {
 		t.Error(err)
-	} else if resp != 0xff {
+	} else if resp[0] != 0xff {
 		t.Errorf("Expected 0xff, got 0x%x", resp)
 	}
 }
@@ -99,7 +99,7 @@ func TestDispatchCloseGood(t *testing.T) {
 	resp, err := getTestInstance().DispatchRequest(0x00)
 	if err != nil {
 		t.Error(err)
-	} else if resp != 0xff {
-		t.Errorf("Expected 0xff, got 0x%x", resp)
+	} else if resp[0] != 0xff {
+		t.Errorf("Expected 0xff, got ", resp)
 	}
 }
