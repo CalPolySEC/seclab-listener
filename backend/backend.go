@@ -25,7 +25,9 @@ func New(linkPath, openPath, closedPath string) Backend {
 	}
 }
 
-// Atomically point a
+// Atomically hardlink src to dst, overwriting dst
+// This is achieved through a hardlink to a temporary file, followed by a move
+// It is assumed that src and dst are on the same device
 func atomicLink(src, dst string) error {
 	tempDir, err := ioutil.TempDir("", "")
 	if err != nil {
