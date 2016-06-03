@@ -32,7 +32,7 @@ New key response:
 ```
   0x55                        (1 byte)
   8-byte timestamp            (as above)
-  HMAC                        (32 bytes)
+  new key                     (32 bytes)
 ```
 
 
