@@ -1,5 +1,11 @@
 package backend
 
+import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+)
+
 type Backend interface {
 	Open() error
 	Close() error
@@ -19,10 +25,25 @@ func New(linkPath, openPath, closedPath string) Backend {
 	}
 }
 
+// Atomically point a
+func atomicLink(src, dst string) error {
+	tempDir, err := ioutil.TempDir("", "")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempDir)
+
+	tempFile := filepath.Join(tempDir, "templink")
+	if err := os.Link(src, tempFile); err != nil {
+		return err
+	}
+	return os.Rename(tempFile, dst)
+}
+
 func (b *fileBackend) Open() error {
-	return nil
+	return atomicLink(b.openPath, b.linkPath)
 }
 
 func (b *fileBackend) Close() error {
-	return nil
+	return atomicLink(b.closedPath, b.linkPath)
 }
