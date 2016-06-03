@@ -24,3 +24,15 @@ The server will simply disconnect on any error, or return an "all good" response
 ```
   0xFF (1 byte)
 ```
+
+A note on TLS
+-------------
+
+As few services should have access to the SSL private key as possible. nginx's
+master process can be reasonably trusted with this key, we are already trusting
+it to secure our web traffic.
+
+This program doesn't need access to the key. Instead, we use TLS termination in
+nginx and it will decrypt the traffic for us, then forward along an unencrypted
+TCP stream to our service. (fun fact, nginx can do this even with generic,
+non-HTTP traffic).
