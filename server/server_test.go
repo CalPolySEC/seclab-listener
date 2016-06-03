@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
+	"github.com/WhiteHatCP/seclab-listener/server"
 	"testing"
 	"time"
-	"github.com/WhiteHatCP/seclab-listener/server"
 )
 
 type nullBackend struct{}
