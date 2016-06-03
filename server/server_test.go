@@ -34,7 +34,7 @@ func getTestInstance() server.Server {
 
 func TestBadSignature(t *testing.T) {
 	msg := make([]byte, 41)
-	_, err := getTestInstance().ParseMessage(msg)
+	err := getTestInstance().CheckMessage(msg)
 	if err == nil || err.Error() != "Incorrect HMAC signature" {
 		t.Error("Expected Incorrect HMAC signature, got", err)
 	}
@@ -44,36 +44,44 @@ func TestExpired(t *testing.T) {
 	payload := make([]byte, 9)
 	mac := hmac.New(sha256.New, []byte("dismykey"))
 	mac.Write(payload)
-	_, err := getTestInstance().ParseMessage(mac.Sum(payload))
+	err := getTestInstance().CheckMessage(mac.Sum(payload))
 	if err == nil || err.Error() != "Request expired" {
 		t.Error("Expected Request expired, got", err)
 	}
 }
 
-func getMessage(status uint8) []byte {
+func TestGoodCheck(t *testing.T) {
 	payload := make([]byte, 9)
-	payload[0] = status
+	payload[0] = 0xff
 	now64 := time.Now().Unix()
 	binary.BigEndian.PutUint64(payload[1:9], uint64(now64))
 	mac := hmac.New(sha256.New, []byte("dismykey"))
 	mac.Write(payload)
-	return mac.Sum(payload)
-}
-
-func TestOpenStatus(t *testing.T) {
-	status, err := getTestInstance().ParseMessage(getMessage(0xff))
-	if err != nil {
+	message := mac.Sum(payload)
+	if err := getTestInstance().CheckMessage(message); err != nil {
 		t.Error(err)
-	} else if status != 0xff {
-		t.Error(status, "!= 0xff")
 	}
 }
 
-func TestCloseStatus(t *testing.T) {
-	status, err := getTestInstance().ParseMessage(getMessage(0x00))
-	if err != nil {
-		t.Error(err)
-	} else if status != 0x00 {
-		t.Error(status, "!= 0x00")
+func TestDispatchUnknown(t *testing.T) {
+	_, err := getTestInstance().DispatchRequest(0x69)
+	if err == nil || err.Error() != "Unrecognized status byte: 0x69" {
+		t.Error("Expected Unrecognized status byte: 0x69, got", err)
+	}
+}
+
+func TestDispatchOpenError(t *testing.T) {
+	s := server.New(nil, 10, &errorBackend{})
+	_, err := s.DispatchRequest(0xff)
+	if err == nil || err.Error() != "open error" {
+		t.Error("Expected open error, got", err)
+	}
+}
+
+func TestDispatchCloseError(t *testing.T) {
+	s := server.New(nil, 10, &errorBackend{})
+	_, err := s.DispatchRequest(0x00)
+	if err == nil || err.Error() != "close error" {
+		t.Error("Expected close error, got", err)
 	}
 }
