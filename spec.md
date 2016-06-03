@@ -5,6 +5,8 @@ Seclab Bot Protocol
 
 The client will establish a TLS1.2 connection with the server using python ssl with a custom SSL context which pins thewhitehat.club's certificate.
 
+Accepted ciphers list in openssl cipher list format: AES256:AESCCM:AESGCM:CHACHA20:SUITEB128:SUITEB192
+
 The client will send the following message:
 
 ```
