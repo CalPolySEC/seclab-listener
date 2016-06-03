@@ -10,9 +10,9 @@ Accepted ciphers list in openssl cipher list format: AES256:AESCCM:AESGCM:CHACHA
 The client will send the following message:
 
 ```
-  open (0xFF) | close (0x00)  (1 byte)   (sanity check, because "change state" is really the only required message)
-  timestamp                   (4 bytes)  python int.to_bytes(time.time().__trunc__(), 4, 'little')
-  HMAC                        (32 bytes)
+  open (0xFF) | close (0x00) | keygen (0xAA)  (1 byte)   (sanity check, because "change state" is really the only required message, or to request a new key)
+  timestamp                                   (8 bytes)  python int.to_bytes(time.time().__trunc__(), 8, 'little')
+  HMAC                                        (32 bytes)
 ```
 
 python hmac will be used with SHA-256.
@@ -26,6 +26,15 @@ The server will simply disconnect on any error, or return an "all good" response
 ```
   0xFF                        (1 byte) ALL GOOD!
 ```
+
+New key response:
+
+```
+  0x55                        (1 byte)
+  8-byte timestamp            (as above)
+  HMAC                        (32 bytes)
+```
+
 
 A note on TLS
 -------------
