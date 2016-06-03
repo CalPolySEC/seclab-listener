@@ -21,4 +21,6 @@ The server will simply disconnect on any error, or return an "all good" response
 
 The server will send the following message:
 
-TBD
+```
+  0xFF                        (1 byte) ALL GOOD!
+```
