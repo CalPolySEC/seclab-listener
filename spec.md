@@ -19,6 +19,8 @@ The HMAC will be keyed with a pre-shared secret 256-bit key, thus message valida
 
 The server will simply disconnect on any error, or return an "all good" response on success.
 
-The server will send the following message:
+"All good" message:
 
-TBD
+```
+  0xFF (1 byte)
+```
