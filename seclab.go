@@ -9,5 +9,5 @@ import (
 func main() {
 	backend := backend.New("status.txt", "open.txt", "closed.txt")
 	s := server.New([]byte(os.Args[1]), 10, backend)
-	s.Serve(":5000")
+	s.Serve("unix", "seclab.sock")
 }
