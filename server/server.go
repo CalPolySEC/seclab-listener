@@ -53,7 +53,7 @@ func (s *server) CheckMessage(data []byte) error {
 		return errors.New("Incorrect HMAC signature")
 	}
 	ts := int64(binary.BigEndian.Uint64(data[1:9]))
-	if time.Now().Unix() - ts > int64(s.maxAge) {
+	if time.Now().Unix()-ts > int64(s.maxAge) {
 		return errors.New("Request expired")
 	}
 	return nil
@@ -66,6 +66,8 @@ func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	} else if status == ReqClose {
 		log.Print("Received request: close")
 		return []byte{RespAllGood}, s.backend.Close()
+	} else if status == ReqKeygen {
+		return nil, fmt.Errorf("Keygen not implemented")
 	} else {
 		return nil, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
 	}
