@@ -23,7 +23,7 @@ const (
 type Server interface {
 	CheckMessage([]byte) error
 	DispatchRequest(byte) ([]byte, error)
-	Serve(string, string)
+	Serve(net.Listener)
 }
 
 type server struct {
@@ -95,11 +95,7 @@ func (s *server) handleConnection(conn net.Conn) {
 	}
 }
 
-func (s *server) Serve(network, addr string) {
-	ln, err := net.Listen(network, addr)
-	if err != nil {
-		log.Fatal(err)
-	}
+func (s *server) Serve(ln net.Listener) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
