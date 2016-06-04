@@ -20,6 +20,16 @@ func main() {
 	}
 	defer ln.Close()
 
+	// Make sure the socket closes
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for sig := range c {
+			log.Printf("Captured: %v", sig)
+			ln.Close()
+		}
+	}()
+
 	backend := backend.New("status.txt", "open.txt", "closed.txt")
 	s := server.New([]byte(os.Args[1]), 10, backend)
 	s.Serve(ln)
