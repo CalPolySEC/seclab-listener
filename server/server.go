@@ -78,7 +78,7 @@ func (s *server) handleConnection(conn net.Conn) {
 	data := make([]byte, 41)
 	for {
 		if _, err := io.ReadFull(conn, data); err != nil {
-			if err != io.ErrUnexpectedEOF {
+			if err != io.EOF {
 				log.Print(err)
 			}
 			return
