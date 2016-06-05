@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/WhiteHatCP/seclab-listener/backend"
 	"github.com/WhiteHatCP/seclab-listener/server"
 	"log"
@@ -11,6 +12,15 @@ import (
 )
 
 func main() {
+	if len(os.Args) < 5 {
+		fmt.Fprintf(os.Stderr, "usage: seclab key dest open closed\n")
+		return
+	}
+	key := os.Args[1]
+	dest := os.Args[2]
+	openfile := os.Args[3]
+	closedfile := os.Args[4]
+
 	syscall.Umask(0007)
 
 	socket := "seclab.sock"
@@ -31,7 +41,7 @@ func main() {
 		}
 	}()
 
-	backend := backend.New("status.txt", "open.txt", "closed.txt")
-	s := server.New([]byte(os.Args[1]), 10, backend)
+	backend := backend.New(dest, openfile, closedfile)
+	s := server.New([]byte(key), 10, backend)
 	s.Serve(ln)
 }
