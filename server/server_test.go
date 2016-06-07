@@ -1,6 +1,7 @@
 package server_test
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/binary"
@@ -121,5 +122,20 @@ func TestDispatchCloseGood(t *testing.T) {
 		t.Error(err)
 	} else if resp[0] != 0xff {
 		t.Errorf("Expected 0xff, got ", resp)
+	}
+}
+
+func TestKeyRotate(t *testing.T) {
+	tempDir, _ := ioutil.TempDir("", "")
+	keypath := filepath.Join(tempDir, "key")
+	ioutil.WriteFile(keypath, []byte("dismykey"), 0644)
+	s := server.New(keypath, 10, &nullBackend{})
+	resp, err := s.KeyRotate()
+	if err != nil {
+		t.Error(err)
+	}
+	key, _ := ioutil.ReadFile(keypath)
+	if bytes.Compare(resp[9:], key) != 0 {
+		t.Error(resp, "!=", key)
 	}
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
@@ -15,15 +16,18 @@ import (
 )
 
 const (
+	KeyLength   = 32
 	ReqOpen     = 0xff
 	ReqClose    = 0x00
 	ReqKeygen   = 0xaa
 	RespAllGood = 0xff
+	RespNewKey  = 0x55
 )
 
 type Server interface {
 	CheckMessage([]byte) error
 	DispatchRequest(byte) ([]byte, error)
+	KeyRotate() ([]byte, error)
 	Serve(net.Listener)
 }
 
@@ -64,6 +68,20 @@ func (s *server) CheckMessage(data []byte) error {
 	return nil
 }
 
+func (s *server) KeyRotate() ([]byte, error) {
+	resp := make([]byte, 9 + KeyLength)
+	key := resp[9:]
+	if _, err := rand.Read(key); err != nil {
+		return nil, err
+	}
+	if err := ioutil.WriteFile(s.keypath, key, 0600); err != nil {
+		return nil, err
+	}
+	resp[0] = RespNewKey
+	binary.BigEndian.PutUint64(resp[1:9], uint64(time.Now().Unix()))
+	return resp, nil
+}
+
 func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	if status == ReqOpen {
 		log.Print("Received request: open")
@@ -72,7 +90,7 @@ func (s *server) DispatchRequest(status byte) ([]byte, error) {
 		log.Print("Received request: close")
 		return []byte{RespAllGood}, s.backend.Close()
 	} else if status == ReqKeygen {
-		return nil, fmt.Errorf("Keygen not implemented")
+		return s.KeyRotate()
 	} else {
 		return nil, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
 	}
