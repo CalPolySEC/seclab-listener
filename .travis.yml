@@ -9,3 +9,4 @@ deploy:
   script: travis/deploy.sh
   on:
     branch: master
+    condition: $TRAVIS_JOB_NUMBER = *.1
