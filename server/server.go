@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/WhiteHatCP/seclab-listener/backend"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"time"
@@ -27,14 +28,14 @@ type Server interface {
 }
 
 type server struct {
-	key     []byte
+	keypath string
 	maxAge  int
 	backend backend.Backend
 }
 
-func New(key []byte, maxAge int, backend backend.Backend) Server {
+func New(keypath string, maxAge int, backend backend.Backend) Server {
 	return &server{
-		key:     key,
+		keypath: keypath,
 		maxAge:  maxAge,
 		backend: backend,
 	}
@@ -49,7 +50,11 @@ func checkHash(key []byte, payload []byte, hash []byte) bool {
 
 // Read the status byte, validate HMAC and timestamp
 func (s *server) CheckMessage(data []byte) error {
-	if !checkHash(s.key, data[:9], data[9:]) {
+	key, err := ioutil.ReadFile(s.keypath)
+	if err != nil {
+		return err
+	}
+	if !checkHash(key, data[:9], data[9:]) {
 		return errors.New("Incorrect HMAC signature")
 	}
 	ts := int64(binary.BigEndian.Uint64(data[1:9]))

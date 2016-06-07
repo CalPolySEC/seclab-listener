@@ -16,7 +16,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "usage: seclab key dest open closed\n")
 		return
 	}
-	key := os.Args[1]
+	keypath := os.Args[1]
 	dest := os.Args[2]
 	openfile := os.Args[3]
 	closedfile := os.Args[4]
@@ -42,6 +42,6 @@ func main() {
 	}()
 
 	backend := backend.New(dest, openfile, closedfile)
-	s := server.New([]byte(key), 10, backend)
+	s := server.New(keypath, 10, backend)
 	s.Serve(ln)
 }
