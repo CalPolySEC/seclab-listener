@@ -10,4 +10,4 @@ echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 git remote add deploy "git@thewhitehat.club:go/src/github.com/WhiteHatCP/seclab-listener"
 PUSH="$(git push deploy)"
 echo "$PUSH"
-grep "Starting seclab" <(echo "$PUSH")
+echo "$PUSH" | grep "Starting seclab" >/dev/null
