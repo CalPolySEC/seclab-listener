@@ -1,4 +1,5 @@
 #!/bin/bash
+grep -V
 set -e
 eval "$(ssh-agent -s)"
 chmod 700 travis

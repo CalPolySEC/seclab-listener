@@ -8,5 +8,5 @@ deploy:
   provider: script
   script: travis/deploy.sh
   on:
-    branch: master
+    branch: master travis
     condition: $TRAVIS_JOB_NUMBER = *.1
