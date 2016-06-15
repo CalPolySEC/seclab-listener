@@ -11,5 +11,5 @@ git remote add deploy "git@thewhitehat.club:go/src/github.com/WhiteHatCP/seclab-
 PUSH="$(git push deploy)"
 echo "$PUSH"
 if [[ "$PUSH" != "*Everything*" ]]; then
-  exit 1
+  exit 2
 fi
