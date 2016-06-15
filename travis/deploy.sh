@@ -8,6 +8,6 @@ ssh-add travis/deploy
 mkdir -m 700 -p ~/.ssh
 echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 git remote add deploy "git@thewhitehat.club:go/src/github.com/WhiteHatCP/seclab-listener"
-PUSH="$(git push deploy)"
+PUSH="$(git push deploy 2>&1)"
 echo "$PUSH"
-echo "$PUSH" | exec grep -q "Starting seclab"
+grep -q "Starting seclab"
