@@ -10,6 +10,6 @@ echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 git remote add deploy "git@thewhitehat.club:go/src/github.com/WhiteHatCP/seclab-listener"
 PUSH="$(git push deploy)"
 echo "$PUSH"
-if [[ "$PUSH" != "*Everything*" ]]; then
+if [[ "$PUSH" != *"Everything"* ]]; then
   exit 2
 fi
