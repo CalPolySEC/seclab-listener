@@ -91,9 +91,8 @@ func (s *server) DispatchRequest(status byte) ([]byte, error) {
 		return []byte{RespAllGood}, s.backend.Close()
 	} else if status == ReqKeygen {
 		return s.KeyRotate()
-	} else {
-		return nil, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
 	}
+	return nil, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
 }
 
 func (s *server) handleConnection(conn net.Conn) {
