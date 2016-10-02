@@ -69,7 +69,7 @@ func (s *server) CheckMessage(data []byte) error {
 }
 
 func (s *server) KeyRotate() ([]byte, error) {
-	resp := make([]byte, 9 + KeyLength)
+	resp := make([]byte, 9+KeyLength)
 	key := resp[9:]
 	if _, err := rand.Read(key); err != nil {
 		return nil, err
