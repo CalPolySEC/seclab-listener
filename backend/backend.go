@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // Backend is the interface used by the frontend to handle Open/Close events
@@ -27,9 +28,9 @@ func New(linkPath, openPath, closedPath string) Backend {
 	}
 }
 
-// Atomically hardlink src to dst, overwriting dst
-// This is achieved through a hardlink to a temporary file, followed by a move
-// It is assumed that src and dst are on the same device
+// Atomically hardlink src to dst, overwriting dst, and update the timestamp.
+// This is achieved through a hardlink to a temporary file, followed by a move,
+// since move is atomic. We're assuming that src and dst are on the same device
 func atomicLink(src, dst string) error {
 	tempDir, err := ioutil.TempDir("", "")
 	if err != nil {
@@ -41,7 +42,12 @@ func atomicLink(src, dst string) error {
 	if err := os.Link(src, tempFile); err != nil {
 		return err
 	}
-	return os.Rename(tempFile, dst)
+
+	if err := os.Rename(tempFile, dst); err != nil {
+		return err
+	}
+
+	return os.Chtimes(dst, time.Now(), time.Now())
 }
 
 func (b *fileBackend) Open() error {

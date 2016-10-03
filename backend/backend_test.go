@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestBadPaths(t *testing.T) {
@@ -35,6 +36,7 @@ func TestLink(t *testing.T) {
 	if err := ioutil.WriteFile(closed, []byte("Lab Closed"), 0644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
+	os.Chtimes(open, time.Unix(0, 0), time.Unix(0, 0))
 
 	// Try to open
 	b := backend.New(link, open, closed)
@@ -46,6 +48,14 @@ func TestLink(t *testing.T) {
 		t.Error(err)
 	} else if bytes.Compare(data, []byte("Lab Open")) != 0 {
 		t.Error("Expected Lap Open, got", string(data))
+	}
+
+	// Check that the mtime changed
+	fi, err := os.Stat(link)
+	if err != nil {
+		t.Error(err)
+	} else if fi.ModTime() == time.Unix(0, 0) {
+		t.Error("Expected mtime to change")
 	}
 
 	// Try to close
