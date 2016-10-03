@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 )
 
+// Backend is the interface used by the frontend to handle Open/Close events
 type Backend interface {
 	Open() error
 	Close() error
@@ -17,6 +18,7 @@ type fileBackend struct {
 	closedPath string
 }
 
+// New creates a new instance of a Backend
 func New(linkPath, openPath, closedPath string) Backend {
 	return &fileBackend{
 		linkPath:   linkPath,

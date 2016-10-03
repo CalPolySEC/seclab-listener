@@ -16,14 +16,15 @@ import (
 )
 
 const (
-	KeyLength   = 32
-	ReqOpen     = 0xff
-	ReqClose    = 0x00
-	ReqKeygen   = 0xaa
-	RespAllGood = 0xff
-	RespNewKey  = 0x55
+	keyLength   = 32
+	reqOpen     = 0xff
+	reqClose    = 0x00
+	reqKeygen   = 0xaa
+	respAllGood = 0xff
+	respNewKey  = 0x55
 )
 
+// Server is the interface that handles the network protocol
 type Server interface {
 	CheckMessage([]byte) error
 	DispatchRequest(byte) ([]byte, error)
@@ -37,6 +38,7 @@ type server struct {
 	backend backend.Backend
 }
 
+// New creates a new instance of a Server
 func New(keypath string, maxAge int, backend backend.Backend) Server {
 	return &server{
 		keypath: keypath,
@@ -69,7 +71,7 @@ func (s *server) CheckMessage(data []byte) error {
 }
 
 func (s *server) KeyRotate() ([]byte, error) {
-	resp := make([]byte, 9+KeyLength)
+	resp := make([]byte, 9+keyLength)
 	key := resp[9:]
 	if _, err := rand.Read(key); err != nil {
 		return nil, err
@@ -77,19 +79,19 @@ func (s *server) KeyRotate() ([]byte, error) {
 	if err := ioutil.WriteFile(s.keypath, key, 0600); err != nil {
 		return nil, err
 	}
-	resp[0] = RespNewKey
+	resp[0] = respNewKey
 	binary.BigEndian.PutUint64(resp[1:9], uint64(time.Now().Unix()))
 	return resp, nil
 }
 
 func (s *server) DispatchRequest(status byte) ([]byte, error) {
-	if status == ReqOpen {
+	if status == reqOpen {
 		log.Print("Received request: open")
-		return []byte{RespAllGood}, s.backend.Open()
-	} else if status == ReqClose {
+		return []byte{respAllGood}, s.backend.Open()
+	} else if status == reqClose {
 		log.Print("Received request: close")
-		return []byte{RespAllGood}, s.backend.Close()
-	} else if status == ReqKeygen {
+		return []byte{respAllGood}, s.backend.Close()
+	} else if status == reqKeygen {
 		return s.KeyRotate()
 	}
 	return nil, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
