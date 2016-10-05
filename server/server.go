@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"time"
 )
 
@@ -23,6 +24,9 @@ const (
 	respAllGood = 0xff
 	respNewKey  = 0x55
 )
+
+var outLog = log.New(os.Stdout, "", log.LstdFlags)
+var errLog = log.New(os.Stderr, "", log.LstdFlags)
 
 // Server is the interface that handles the network protocol
 type Server interface {
@@ -86,10 +90,10 @@ func (s *server) KeyRotate() ([]byte, error) {
 
 func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	if status == reqOpen {
-		log.Print("Received request: open")
+		outLog.Print("Received request: open")
 		return []byte{respAllGood}, s.backend.Open()
 	} else if status == reqClose {
-		log.Print("Received request: close")
+		outLog.Print("Received request: close")
 		return []byte{respAllGood}, s.backend.Close()
 	} else if status == reqKeygen {
 		return s.KeyRotate()
@@ -103,18 +107,18 @@ func (s *server) handleConnection(conn net.Conn) {
 	for {
 		if _, err := io.ReadFull(conn, data); err != nil {
 			if err != io.EOF {
-				log.Print(err)
+				errLog.Print(err)
 			}
 			return
 		}
 		err := s.CheckMessage(data)
 		if err != nil {
-			log.Print(err)
+			errLog.Print(err)
 			return
 		}
 		resp, err := s.DispatchRequest(data[0])
 		if err != nil {
-			log.Print(err)
+			errLog.Print(err)
 			return
 		}
 		conn.Write(resp)
@@ -122,10 +126,11 @@ func (s *server) handleConnection(conn net.Conn) {
 }
 
 func (s *server) Serve(ln net.Listener) {
+	outLog.Print("Seclab listener started")
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Fatal(err)
+			errLog.Fatal(err)
 		}
 		go s.handleConnection(conn)
 	}
