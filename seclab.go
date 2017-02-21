@@ -24,9 +24,9 @@ func main() {
 	s := server.New(keypath, maxPacketAge)
 
 	for i := 2; i+2 < len(os.Args); i += 3 {
-		dest := os.Args[2]
-		openfile := os.Args[3]
-		closedfile := os.Args[4]
+		dest := os.Args[i+2]
+		openfile := os.Args[i+3]
+		closedfile := os.Args[i+4]
 		s.AddBackend(backend.New(dest, openfile, closedfile))
 	}
 
