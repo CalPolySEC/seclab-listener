@@ -16,12 +16,18 @@ import (
 
 type Closer func()
 
-type nullBackend struct{}
+type countingBackend struct {
+	numOpen  int
+	numClose int
+}
 
-func (b *nullBackend) Open() error {
+func (b *countingBackend) Open() error {
+	b.numOpen += 1
 	return nil
 }
-func (b *nullBackend) Close() error {
+
+func (b *countingBackend) Close() error {
+	b.numClose += 1
 	return nil
 }
 
@@ -38,7 +44,9 @@ func getTestInstance() (server.Server, Closer) {
 	tempDir, _ := ioutil.TempDir("", "")
 	keypath := filepath.Join(tempDir, "key")
 	ioutil.WriteFile(keypath, []byte("dismykey"), 0644)
-	return server.New(keypath, 10, &nullBackend{}), func() {
+	s := server.New(keypath, 10)
+	s.AddBackend(&countingBackend{})
+	return s, func() {
 		os.RemoveAll(tempDir)
 	}
 }
@@ -90,7 +98,8 @@ func TestDispatchUnknown(t *testing.T) {
 }
 
 func TestDispatchOpenError(t *testing.T) {
-	s := server.New("", 10, &errorBackend{})
+	s := server.New("", 10)
+	s.AddBackend(&errorBackend{})
 	_, err := s.DispatchRequest(0xff)
 	if err == nil || err.Error() != "open error" {
 		t.Error("Expected open error, got", err)
@@ -98,7 +107,8 @@ func TestDispatchOpenError(t *testing.T) {
 }
 
 func TestDispatchCloseError(t *testing.T) {
-	s := server.New("", 10, &errorBackend{})
+	s := server.New("", 10)
+	s.AddBackend(&errorBackend{})
 	_, err := s.DispatchRequest(0x00)
 	if err == nil || err.Error() != "close error" {
 		t.Error("Expected close error, got", err)
@@ -106,7 +116,8 @@ func TestDispatchCloseError(t *testing.T) {
 }
 
 func TestDispatchOpenGood(t *testing.T) {
-	s := server.New("", 10, &nullBackend{})
+	s, close := getTestInstance()
+	defer close()
 	resp, err := s.DispatchRequest(0xff)
 	if err != nil {
 		t.Error(err)
@@ -116,7 +127,8 @@ func TestDispatchOpenGood(t *testing.T) {
 }
 
 func TestDispatchCloseGood(t *testing.T) {
-	s := server.New("", 10, &nullBackend{})
+	s, close := getTestInstance()
+	defer close()
 	resp, err := s.DispatchRequest(0x00)
 	if err != nil {
 		t.Error(err)
@@ -129,7 +141,7 @@ func TestKeyRotate(t *testing.T) {
 	tempDir, _ := ioutil.TempDir("", "")
 	keypath := filepath.Join(tempDir, "key")
 	ioutil.WriteFile(keypath, []byte("dismykey"), 0644)
-	s := server.New(keypath, 10, &nullBackend{})
+	s := server.New(keypath, 10)
 	resp, err := s.KeyRotate()
 	if err != nil {
 		t.Error(err)
@@ -137,5 +149,25 @@ func TestKeyRotate(t *testing.T) {
 	key, _ := ioutil.ReadFile(keypath)
 	if bytes.Compare(resp[9:], key) != 0 {
 		t.Error(resp, "!=", key)
+	}
+}
+
+func TestMultipleBackends(t *testing.T) {
+	b := &countingBackend{0, 0}
+	s := server.New("", 10)
+	s.AddBackend(b)
+	s.AddBackend(b)
+
+	if _, err := s.DispatchRequest(0x00); err != nil {
+		t.Error(err)
+	}
+	if _, err := s.DispatchRequest(0xff); err != nil {
+		t.Error(err)
+	}
+
+	if b.numOpen != 2 {
+		t.Error("Expected Open to be called 2 times, was called ", b.numOpen)
+	} else if b.numClose != 2 {
+		t.Error("Expected Close to be called 2 times, was called ", b.numClose)
 	}
 }

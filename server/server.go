@@ -30,6 +30,7 @@ var errLog = log.New(os.Stderr, "", log.LstdFlags)
 
 // Server is the interface that handles the network protocol
 type Server interface {
+	AddBackend(backend.Backend)
 	CheckMessage([]byte) error
 	DispatchRequest(byte) ([]byte, error)
 	KeyRotate() ([]byte, error)
@@ -37,18 +38,22 @@ type Server interface {
 }
 
 type server struct {
-	keypath string
-	maxAge  int
-	backend backend.Backend
+	keypath  string
+	maxAge   int
+	backends []backend.Backend
 }
 
 // New creates a new instance of a Server
-func New(keypath string, maxAge int, backend backend.Backend) Server {
+func New(keypath string, maxAge int) Server {
 	return &server{
-		keypath: keypath,
-		maxAge:  maxAge,
-		backend: backend,
+		keypath:  keypath,
+		maxAge:   maxAge,
+		backends: nil,
 	}
+}
+
+func (s *server) AddBackend(b backend.Backend) {
+	s.backends = append(s.backends, b)
 }
 
 func checkHash(key []byte, payload []byte, hash []byte) bool {
@@ -88,13 +93,31 @@ func (s *server) KeyRotate() ([]byte, error) {
 	return resp, nil
 }
 
+func (s *server) open() error {
+	for _, b := range s.backends {
+		if err := b.Open(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *server) close() error {
+	for _, b := range s.backends {
+		if err := b.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	if status == reqOpen {
 		outLog.Print("Received request: open")
-		return []byte{respAllGood}, s.backend.Open()
+		return []byte{respAllGood}, s.open()
 	} else if status == reqClose {
 		outLog.Print("Received request: close")
-		return []byte{respAllGood}, s.backend.Close()
+		return []byte{respAllGood}, s.close()
 	} else if status == reqKeygen {
 		return s.KeyRotate()
 	}
@@ -103,7 +126,7 @@ func (s *server) DispatchRequest(status byte) ([]byte, error) {
 
 func (s *server) handleConnection(conn net.Conn) {
 	defer conn.Close()
-	data := make([]byte, 41)
+	data := make([]byte, 9+keyLength)
 	for {
 		if _, err := io.ReadFull(conn, data); err != nil {
 			if err != io.EOF {
