@@ -4,8 +4,6 @@ Seclab Listener
 [![Build Status](https://api.travis-ci.org/WhiteHatCP/seclab-listener.svg?branch=master)](https://travis-ci.org/WhiteHatCP/seclab-listener)
 [![Lab Status](https://thewhitehat.club/status.svg)](https://thewhitehat.club/)
 
-> Making the White Hat Security Club Lab great again
-
 ## Building
 
 To build the server program in the current directory:
