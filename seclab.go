@@ -19,7 +19,7 @@ func openSock(path string) (net.Listener, error) {
 	if err := syscall.Unlink(path); err != nil && err != syscall.EEXIST {
 		return nil, err
 	}
-	ln, err := net.Listen("unix", socket)
+	ln, err := net.Listen("unix", path)
 	if err != nil {
 		return nil, err
 	}
