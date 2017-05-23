@@ -15,6 +15,20 @@ const (
 	maxPacketAge = 10
 )
 
+func openSock(path string) (net.Listener, error) {
+	if err := syscall.Unlink(path); err != nil && err != syscall.EEXIST {
+		return nil, err
+	}
+	ln, err := net.Listen("unix", socket)
+	if err != nil {
+		return nil, err
+	}
+	if err := syscall.Chmod(path, 0770); err != nil {
+		return nil, err
+	}
+	return ln, nil
+}
+
 func main() {
 	if len(os.Args)%3 != 2 {
 		fmt.Fprintf(os.Stderr, "usage: seclab key [dest open closed [..]]\n")
@@ -33,8 +47,7 @@ func main() {
 	syscall.Umask(0007)
 
 	socket := "seclab.sock"
-	ln, err := net.Listen("unix", socket)
-	syscall.Chmod(socket, 0770)
+	ln, err := openSock(socket)
 	if err != nil {
 		log.Fatal(err)
 	}
