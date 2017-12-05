@@ -9,5 +9,5 @@ mkdir -m 700 -p ~/.ssh
 echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 git remote add deploy "git@thewhitehat.club:go/src/github.com/WhiteHatCP/seclab-listener"
 echo "Added deploy remote"
-git push deploy 2>&1 | tee deploy.out
+git push deploy master 2>&1 | tee deploy.out
 grep -q "SUCCESS" deploy.out
