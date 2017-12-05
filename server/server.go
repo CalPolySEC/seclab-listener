@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/WhiteHatCP/seclab-listener/backend"
+	"github.com/getsentry/raven-go"
 	"io"
 	"io/ioutil"
 	"log"
@@ -124,27 +125,33 @@ func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	return nil, fmt.Errorf("Unrecognized status byte: 0x%02x", status)
 }
 
-func (s *server) handleConnection(conn net.Conn) {
+func (s *server) readAndRespond(conn net.Conn) error {
 	defer conn.Close()
 	data := make([]byte, 9+keyLength)
 	for {
 		if _, err := io.ReadFull(conn, data); err != nil {
 			if err != io.EOF {
-				errLog.Print(err)
+				return err
 			}
-			return
+			return nil
 		}
-		err := s.CheckMessage(data)
-		if err != nil {
-			errLog.Print(err)
-			return
+		if err := s.CheckMessage(data); err != nil {
+			return err
 		}
 		resp, err := s.DispatchRequest(data[0])
 		if err != nil {
-			errLog.Print(err)
-			return
+			return err
 		}
-		conn.Write(resp)
+		if _, err = conn.Write(resp); err != nil {
+			return err
+		}
+	}
+}
+
+func (s *server) handleConnection(conn net.Conn) {
+	if err := s.readAndRespond(conn); err != nil {
+		raven.CaptureError(err, nil)
+		errLog.Print(err)
 	}
 }
 
