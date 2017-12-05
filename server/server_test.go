@@ -133,7 +133,7 @@ func TestDispatchCloseGood(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else if resp[0] != 0xff {
-		t.Errorf("Expected 0xff, got ", resp)
+		t.Errorf("Expected 0xff, got 0x%x", resp)
 	}
 }
 
