@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/WhiteHatCP/seclab-listener/backend"
 	"github.com/WhiteHatCP/seclab-listener/server"
+	"github.com/getsentry/raven-go"
 	"log"
 	"net"
 	"os"
@@ -49,6 +50,7 @@ func main() {
 	socket := "seclab.sock"
 	ln, err := openSock(socket)
 	if err != nil {
+		raven.CaptureErrorAndWait(err, nil)
 		log.Fatal(err)
 	}
 	defer ln.Close()

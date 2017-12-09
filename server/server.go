@@ -160,6 +160,7 @@ func (s *server) Serve(ln net.Listener) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
+			raven.CaptureErrorAndWait(err, nil)
 			errLog.Fatal(err)
 		}
 		go s.handleConnection(conn)
