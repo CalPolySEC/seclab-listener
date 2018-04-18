@@ -31,6 +31,11 @@ func (b *countingBackend) Close() error {
 	return nil
 }
 
+func (b *countingBackend) Coffee() error {
+	b.numClose += 1
+	return nil
+}
+
 type errorBackend struct{}
 
 func (b *errorBackend) Open() error {
