@@ -21,7 +21,7 @@ const (
 	keyLength   = 32
 	reqOpen     = 0xff
 	reqClose    = 0x00
-	reqCoffee	= 0xcc
+	reqCoffee   = 0xcc
 	reqKeygen   = 0xaa
 	respAllGood = 0xff
 	respNewKey  = 0x55
