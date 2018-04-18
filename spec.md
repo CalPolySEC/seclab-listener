@@ -10,7 +10,7 @@ Accepted ciphers list in openssl cipher list format: AES256:AESCCM:AESGCM:CHACHA
 The client will send the following message:
 
 ```
-  open (0xFF) | close (0x00) | keygen (0xAA)  (1 byte)   (sanity check, because "change state" is really the only required message, or to request a new key)
+  open (0xFF) | close (0x00) | coffee (0xcc) | keygen (0xAA)  (1 byte)   (sanity check, because "change state" is really the only required message, or to request a new key)
   timestamp                                   (8 bytes)  python int.to_bytes(time.time().__trunc__(), 8, 'little')
   HMAC                                        (32 bytes)
 ```
