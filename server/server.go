@@ -114,7 +114,7 @@ func (s *server) close() error {
 }
 
 func (s *server) coffee() error {
-	for _, b  range s.backends {
+	for _, b :=  range s.backends {
 		if err := b.Coffee(); err != nil {
 			return err
 		}
