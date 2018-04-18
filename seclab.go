@@ -31,18 +31,19 @@ func openSock(path string) (net.Listener, error) {
 }
 
 func main() {
-	if len(os.Args)%3 != 2 {
-		fmt.Fprintf(os.Stderr, "usage: seclab key [dest open closed [..]]\n")
+	if len(os.Args)%4 != 2 {
+		fmt.Fprintf(os.Stderr, "usage: seclab key [dest open closed coffee [..]]\n")
 		return
 	}
 	keypath := os.Args[1]
 	s := server.New(keypath, maxPacketAge)
 
-	for i := 2; i+2 < len(os.Args); i += 3 {
+	for i := 2; i+2 < len(os.Args); i += 4 {
 		dest := os.Args[i]
 		openfile := os.Args[i+1]
 		closedfile := os.Args[i+2]
-		s.AddBackend(backend.New(dest, openfile, closedfile))
+		coffeefile := os.Args[i+3]
+		s.AddBackend(backend.New(dest, openfile, closedfile, coffeefile))
 	}
 
 	syscall.Umask(0007)

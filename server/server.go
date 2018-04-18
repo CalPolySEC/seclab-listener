@@ -21,6 +21,7 @@ const (
 	keyLength   = 32
 	reqOpen     = 0xff
 	reqClose    = 0x00
+	reqCoffee   = 0xcc
 	reqKeygen   = 0xaa
 	respAllGood = 0xff
 	respNewKey  = 0x55
@@ -106,6 +107,15 @@ func (s *server) open() error {
 func (s *server) close() error {
 	for _, b := range s.backends {
 		if err := b.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *server) coffee() error {
+	for _, b :=  range s.backends {
+		if err := b.Coffee(); err != nil {
 			return err
 		}
 	}

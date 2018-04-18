@@ -31,6 +31,11 @@ func (b *countingBackend) Close() error {
 	return nil
 }
 
+func (b *countingBackend) Coffee() error {
+	b.numClose += 1
+	return nil
+}
+
 type errorBackend struct{}
 
 func (b *errorBackend) Open() error {
@@ -38,6 +43,9 @@ func (b *errorBackend) Open() error {
 }
 func (b *errorBackend) Close() error {
 	return errors.New("close error")
+}
+func (b *errorBackend) Coffee() error {
+	return errors.New("coffee error")
 }
 
 func getTestInstance() (server.Server, Closer) {

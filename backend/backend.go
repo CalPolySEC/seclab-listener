@@ -11,20 +11,23 @@ import (
 type Backend interface {
 	Open() error
 	Close() error
+	Coffee() error
 }
 
 type fileBackend struct {
 	linkPath   string
 	openPath   string
 	closedPath string
+	coffeePath string
 }
 
 // New creates a new instance of a Backend
-func New(linkPath, openPath, closedPath string) Backend {
+func New(linkPath, openPath, closedPath, coffeePath string) Backend {
 	return &fileBackend{
 		linkPath:   linkPath,
 		openPath:   openPath,
 		closedPath: closedPath,
+		coffeePath: coffeePath,
 	}
 }
 
@@ -56,4 +59,8 @@ func (b *fileBackend) Open() error {
 
 func (b *fileBackend) Close() error {
 	return atomicLink(b.closedPath, b.linkPath)
+}
+
+func (b *fileBackend) Coffee() error {
+	return atomicLink(b.coffeePath, b.linkPath)
 }
