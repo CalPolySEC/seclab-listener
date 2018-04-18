@@ -39,6 +39,9 @@ func (b *errorBackend) Open() error {
 func (b *errorBackend) Close() error {
 	return errors.New("close error")
 }
+func (b *errorBackend) Coffee() error {
+	return errors.New("coffee error")
+}
 
 func getTestInstance() (server.Server, Closer) {
 	tempDir, _ := ioutil.TempDir("", "")
