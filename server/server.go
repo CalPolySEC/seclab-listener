@@ -114,7 +114,7 @@ func (s *server) close() error {
 }
 
 func (s *server) coffee() error {
-	for _, b :=  range s.backends {
+	for _, b := range s.backends {
 		if err := b.Coffee(); err != nil {
 			return err
 		}
@@ -129,6 +129,9 @@ func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	} else if status == reqClose {
 		outLog.Print("Received request: close")
 		return []byte{respAllGood}, s.close()
+	} else if status == reqCoffee {
+		outLog.Print("Received request: close")
+		return []byte{respAllGood}, s.coffee()
 	} else if status == reqKeygen {
 		return s.KeyRotate()
 	}
