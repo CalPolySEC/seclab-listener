@@ -32,14 +32,14 @@ func openSock(path string) (net.Listener, error) {
 }
 
 func main() {
-	if len(os.Args)%4 != 2 {
+	if len(os.Args)%5 != 2 {
 		fmt.Fprintf(os.Stderr, "usage: seclab key [dest open closed coffee fire [..]]\n")
 		return
 	}
 	keypath := os.Args[1]
 	s := server.New(keypath, maxPacketAge)
 
-	for i := 2; i+2 < len(os.Args); i += 5 {
+	for i := 2; i+4 < len(os.Args); i += 5 {
 		dest := os.Args[i]
 		openfile := os.Args[i+1]
 		closedfile := os.Args[i+2]
