@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
+	"github.com/getsentry/raven-go"
 	"github.com/WhiteHatCP/seclab-listener/backend"
 	"github.com/WhiteHatCP/seclab-listener/server"
 )
