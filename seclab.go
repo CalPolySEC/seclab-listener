@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/WhiteHatCP/seclab-listener/backend"
-	"github.com/WhiteHatCP/seclab-listener/server"
-	"github.com/getsentry/raven-go"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/WhiteHatCP/seclab-listener/backend"
+	"github.com/WhiteHatCP/seclab-listener/server"
 )
 
 const (
@@ -32,18 +32,19 @@ func openSock(path string) (net.Listener, error) {
 
 func main() {
 	if len(os.Args)%4 != 2 {
-		fmt.Fprintf(os.Stderr, "usage: seclab key [dest open closed coffee [..]]\n")
+		fmt.Fprintf(os.Stderr, "usage: seclab key [dest open closed coffee fire [..]]\n")
 		return
 	}
 	keypath := os.Args[1]
 	s := server.New(keypath, maxPacketAge)
 
-	for i := 2; i+2 < len(os.Args); i += 4 {
+	for i := 2; i+2 < len(os.Args); i += 5 {
 		dest := os.Args[i]
 		openfile := os.Args[i+1]
 		closedfile := os.Args[i+2]
 		coffeefile := os.Args[i+3]
-		s.AddBackend(backend.New(dest, openfile, closedfile, coffeefile))
+		firefile := os.Args[i+4]
+		s.AddBackend(backend.New(dest, openfile, closedfile, coffeefile, firefile))
 	}
 
 	syscall.Umask(0007)

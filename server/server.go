@@ -25,6 +25,7 @@ const (
 	reqKeygen   = 0xaa
 	respAllGood = 0xff
 	respNewKey  = 0x55
+	reqFire     = 0xfc
 )
 
 var outLog = log.New(os.Stdout, "", log.LstdFlags)
@@ -122,6 +123,15 @@ func (s *server) coffee() error {
 	return nil
 }
 
+func (s *server) fire() error {
+	for _, b := range s.backends {
+		if err := b.Fire(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	if status == reqOpen {
 		outLog.Print("Received request: open")
@@ -132,6 +142,9 @@ func (s *server) DispatchRequest(status byte) ([]byte, error) {
 	} else if status == reqCoffee {
 		outLog.Print("Received request: close")
 		return []byte{respAllGood}, s.coffee()
+	} else if status == reqFire {
+		outLog.Print("Received request: close")
+		return []byte{respAllGood}, s.fire()
 	} else if status == reqKeygen {
 		return s.KeyRotate()
 	}

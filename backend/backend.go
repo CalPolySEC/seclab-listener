@@ -12,6 +12,7 @@ type Backend interface {
 	Open() error
 	Close() error
 	Coffee() error
+	Fire() error
 }
 
 type fileBackend struct {
@@ -19,15 +20,17 @@ type fileBackend struct {
 	openPath   string
 	closedPath string
 	coffeePath string
+	firePath   string
 }
 
 // New creates a new instance of a Backend
-func New(linkPath, openPath, closedPath, coffeePath string) Backend {
+func New(linkPath, openPath, closedPath, coffeePath, firePath string) Backend {
 	return &fileBackend{
 		linkPath:   linkPath,
 		openPath:   openPath,
 		closedPath: closedPath,
 		coffeePath: coffeePath,
+		firePath:   firePath,
 	}
 }
 
@@ -63,4 +66,8 @@ func (b *fileBackend) Close() error {
 
 func (b *fileBackend) Coffee() error {
 	return atomicLink(b.coffeePath, b.linkPath)
+}
+
+func (b *fileBackend) Fire() error {
+	return atomicLink(b.firePath, b.linkPath)
 }
