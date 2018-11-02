@@ -54,7 +54,7 @@ func TestLink(t *testing.T) {
 	os.Chtimes(open, time.Unix(0, 0), time.Unix(0, 0))
 
 	// Try to open
-	b := backend.New(link, open, closed, coffee)
+	b := backend.New(link, open, closed, coffee, fire)
 	if err := b.Open(); err != nil {
 		t.Error(err)
 	}
